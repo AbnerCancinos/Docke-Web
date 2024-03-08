@@ -1,0 +1,28 @@
+﻿**Comandos Docker 
+
+
+docker build -t test .
+docker run -p 8085:8080 --name nombre_contenedor test
+* Esto significa que cualquier solicitud al puerto 8081 en el host se redirigirá al puerto 8080 dentro del contenedor.
+
+
+**DockerFile
+
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+USER app
+WORKDIR /app
+EXPOSE 8080
+
+# Build image
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+COPY *.csproj .
+RUN dotnet restore
+COPY . .
+RUN dotnet publish -c release -o /app
+
+# Final image
+FROM base AS final
+WORKDIR /app
+COPY --from=build /app .
+ENTRYPOINT ["dotnet", "PruebaDocker.dll"]
